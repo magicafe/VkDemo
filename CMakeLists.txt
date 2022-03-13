@@ -8,7 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 include(CTest)
 enable_testing()
 
-add_executable(VkDemo stb_image.h MVP.h Vertex.h SpvLoader.h SwapChainSupport.h Queues.h Triangle.h Triangle.cpp main.cpp)
+add_executable(VkDemo tiny_obj_loader.h stb_image.h Model.h Model.cpp MVP.h Vertex.h SpvLoader.h SwapChainSupport.h Queues.h Triangle.h Triangle.cpp main.cpp)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

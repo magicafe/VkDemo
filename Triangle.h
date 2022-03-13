@@ -9,6 +9,7 @@
 
 #include "Queues.h"
 #include "SwapChainSupport.h"
+#include "Model.h"
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -77,6 +78,8 @@ private:
     uint32_t currentFrame = 0;
 
     VkDebugUtilsMessengerEXT debugMessenger;
+
+    Model model;
 
 public:
     void run()
@@ -158,6 +161,8 @@ private:
     VkShaderModule createShaderModule(const std::vector<char> &code);
 
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
+    void loadModel();
 
 public:
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(

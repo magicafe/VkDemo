@@ -60,6 +60,8 @@ void Triangle::initVulkan()
     std::cout << "createTextureImageView" << std::endl;
     createTextureSampler();
     std::cout << "createTextureSampler" << std::endl;
+    loadModel();
+    std::cout << "loadModel" << std::endl;
     createVertexBuffer();
     std::cout << "createVertexBuffer" << std::endl;
     createIndexBuffer();
@@ -816,7 +818,7 @@ void Triangle::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize s
 
 void Triangle::createVertexBuffer()
 {
-    VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+    VkDeviceSize bufferSize = sizeof(model.vertices[0]) * model.vertices.size();
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -824,7 +826,7 @@ void Triangle::createVertexBuffer()
 
     void *data;
     vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, vertices.data(), (size_t)bufferSize);
+    memcpy(data, model.vertices.data(), (size_t)bufferSize);
     vkUnmapMemory(device, stagingBufferMemory);
 
     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
@@ -837,7 +839,7 @@ void Triangle::createVertexBuffer()
 
 void Triangle::createIndexBuffer()
 {
-    VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+    VkDeviceSize bufferSize = sizeof(model.indices[0]) * model.indices.size();
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -845,7 +847,7 @@ void Triangle::createIndexBuffer()
 
     void *data;
     vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, indices.data(), (size_t)bufferSize);
+    memcpy(data, model.indices.data(), (size_t)bufferSize);
     vkUnmapMemory(device, stagingBufferMemory);
 
     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
@@ -1024,7 +1026,8 @@ void Triangle::createImage(uint32_t width, uint32_t height, VkFormat format, VkI
 void Triangle::createTextureImage()
 {
     int texWidth, texHeight, texChannels;
-    stbi_uc *pixels = stbi_load("../textures/statue.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    // stbi_uc *pixels = stbi_load("../textures/statue.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    stbi_uc *pixels = stbi_load(TEXTURE_PATH.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
     VkDeviceSize imageSize = texWidth * texHeight * 4;
     if (!pixels)
     {
@@ -1220,11 +1223,11 @@ void Triangle::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t image
     VkBuffer vertexBuffers[] = {vertexBuffer};
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-    vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+    vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
 
-    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(model.indices.size()), 1, 0, 0, 0);
     vkCmdEndRenderPass(commandBuffer);
 
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
@@ -1579,4 +1582,9 @@ uint32_t Triangle::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags pro
     }
 
     throw std::runtime_error("failed to find suitable memory type!");
+}
+
+void Triangle::loadModel()
+{
+    model.loadModel();
 }
